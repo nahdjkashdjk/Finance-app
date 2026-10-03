@@ -1,6 +1,6 @@
 // Finance – service worker: maakt de app offline beschikbaar.
 // Verhoog VERSION bij elke nieuwe versie van index.html.
-const VERSION = 'finance-v9';
+const VERSION = 'finance-v10';
 const ASSETS = [
   './', './index.html', './manifest.webmanifest',
   './icons/icon-192-v2.png', './icons/icon-512-v2.png', './icons/maskable-192-v2.png', './icons/maskable-512-v2.png',

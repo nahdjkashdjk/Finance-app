@@ -465,7 +465,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   <div class="kpi" data-k="beleg"><div class="label"><span class="dot" style="background:var(--beleg)"></span>Beleggingen</div><div class="value"></div><div class="delta"></div></div>
   <div class="kpi" data-k="bnd"><div class="label"><span class="dot" style="background:var(--bnd)"></span>Brand New Day</div><div class="value"></div><div class="delta"></div></div>
   <div class="kpi" data-k="woning" data-feature="woning"><div class="label"><span class="dot" style="background:var(--woning)"></span>Eigen vermogen woning</div><div class="value"></div><div class="delta"></div></div>
-  <div class="kpi" data-k="studie" data-feature="studie" data-invert><div class="label"><span class="dot" style="background:var(--neg)"></span>Studieschuld</div><div class="value"></div><div class="delta"></div></div>
+  <div class="kpi" data-k="studieAf" data-feature="studie"><div class="label"><span class="dot" style="background:var(--neg)"></span>Studieschuld</div><div class="value"></div><div class="delta"></div></div>
 </section>
 
 <main>
@@ -1040,7 +1040,7 @@ function render() {
   $('asof').textContent = asof;
   document.querySelectorAll('.kpi').forEach(el => {
     const k = el.dataset.k;
-    el.querySelector('.value').textContent = eur.format(last[k]);
+    el.querySelector('.value').textContent = (last[k] < 0 ? '−' : '') + eur.format(Math.abs(last[k]));
     const delta = el.querySelector('.delta');
     if (!rel) { delta.className = 'delta'; delta.innerHTML = '<span class="rel">Geen eerdere stand</span>'; return; }
     const diff = last[k] - base[k];
