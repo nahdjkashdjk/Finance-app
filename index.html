@@ -130,20 +130,24 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     padding: 8px 24px 28px;
     display: grid; grid-template-columns: repeat(6, 1fr); gap: 0;
   }
-  .banner { grid-template-columns: repeat(var(--kpis, 6), 1fr); }
+  .banner { grid-template-columns: repeat(var(--kpis, 6), auto); justify-content: space-between; }
   .banner.hide-total .kpi[data-k="totaal"] { display: none; }
   .banner .kpi.first { border-left: 0; padding-left: 0; }
   .kpi { padding: 10px 24px 4px; border-left: 1px solid rgba(255,255,255,0.18); }
 
-  .kpi .label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--band-muted); }
+  .kpi { min-width: 0; }
+  .kpi .label { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--band-muted); white-space: nowrap; min-width: 0; }
+  .kpi .label .dot { flex: none; }
+  .kpi .label { overflow: hidden; text-overflow: ellipsis; }
   .kpi .dot { width: 9px; height: 9px; border-radius: 50%; }
-  .kpi .value { font-size: clamp(22px, 2.2vw, 32px); font-weight: 700; letter-spacing: -0.02em; margin: 4px 0 2px; }
+  .kpi .value { font-size: clamp(20px, 1.95vw, 30px); font-weight: 700; letter-spacing: -0.02em; margin: 4px 0 2px; }
   .kpi .delta { font-size: 14px; font-weight: 500; }
   .kpi .delta.up { color: var(--pos-band); }
   .kpi .delta.down { color: var(--neg-band); }
-  .kpi .delta .rel { color: var(--band-muted); font-weight: 400; }
-  .kpi[data-k="totaal"] .value { font-size: clamp(24px, 2.6vw, 38px); }
-  .kpi { padding: 10px 18px 4px; }
+  .kpi .delta .rel { color: var(--band-muted); font-weight: 400; display: block; font-size: 13px; }
+  .kpi .delta { white-space: nowrap; }
+  .kpi[data-k="totaal"] .value { font-size: clamp(22px, 2.3vw, 34px); }
+  .kpi { padding: 10px 16px 4px; }
   .asof { grid-column: 1 / -1; font-size: 13px; color: var(--band-muted); margin-bottom: 4px; }
 
   /* Grid */
@@ -272,6 +276,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .btn.solid { background: var(--band); color: #fff; border-color: var(--band); font-weight: 600; }
   .btn.solid:hover { background: #1F4268; }
 
+  @media (max-width: 1300px) {
+    .banner, .banner.hide-total { grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 16px; }
+    .banner .kpi { border-left: 0; padding-left: 0; }
+  }
   @media (max-width: 1100px) {
     .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .banner, .banner.hide-total { grid-template-columns: repeat(3, 1fr); row-gap: 16px; }
@@ -448,6 +456,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   <div class="kpi" data-k="beleg"><div class="label"><span class="dot" style="background:var(--beleg)"></span>Beleggingen</div><div class="value"></div><div class="delta"></div></div>
   <div class="kpi" data-k="bnd"><div class="label"><span class="dot" style="background:var(--bnd)"></span>Brand New Day</div><div class="value"></div><div class="delta"></div></div>
   <div class="kpi" data-k="woning" data-feature="woning"><div class="label"><span class="dot" style="background:var(--woning)"></span>Eigen vermogen woning</div><div class="value"></div><div class="delta"></div></div>
+  <div class="kpi" data-k="studie" data-feature="studie" data-invert><div class="label"><span class="dot" style="background:var(--neg)"></span>Studieschuld</div><div class="value"></div><div class="delta"></div></div>
 </section>
 
 <main>
@@ -1026,7 +1035,8 @@ function render() {
     const delta = el.querySelector('.delta');
     if (!rel) { delta.className = 'delta'; delta.innerHTML = '<span class="rel">Geen eerdere stand</span>'; return; }
     const diff = last[k] - base[k];
-    delta.className = 'delta ' + (diff > 0 ? 'up' : diff < 0 ? 'down' : '');
+    const good = el.hasAttribute('data-invert') ? -diff : diff;   // bij een schuld is een daling goed nieuws
+    delta.className = 'delta ' + (good > 0 ? 'up' : good < 0 ? 'down' : '');
     delta.innerHTML = `${diff > 0 ? '▲' : diff < 0 ? '▼' : ''} ${signed(diff)} <span class="rel">${rel}</span>`;
   });
 
