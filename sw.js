@@ -1,10 +1,10 @@
 // Finance – service worker: maakt de app offline beschikbaar.
 // Verhoog VERSION bij elke nieuwe versie van index.html.
-const VERSION = 'finance-v4';
+const VERSION = 'finance-v6';
 const ASSETS = [
   './', './index.html', './manifest.webmanifest',
-  './icons/icon-192.png', './icons/icon-512.png', './icons/maskable-192.png', './icons/maskable-512.png',
-  './icons/apple-touch-icon.png', './icons/favicon-64.png',
+  './icons/icon-192-v2.png', './icons/icon-512-v2.png', './icons/maskable-192-v2.png', './icons/maskable-512-v2.png',
+  './icons/apple-touch-icon-v2.png', './icons/favicon-64-v2.png',
 ];
 
 self.addEventListener('install', e => {
@@ -21,8 +21,12 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
+  const url = new URL(req.url);
+  const scope = new URL(self.registration.scope);
+  const isApp = req.mode === 'navigate' && (url.pathname === scope.pathname || url.pathname === scope.pathname + 'index.html');
+  if (req.mode === 'navigate' && !isApp) return;   // andere adressen (zoals een afbeelding) gewoon van het internet
   e.respondWith(caches.open(VERSION).then(async cache => {
-    const key = req.mode === 'navigate' ? './index.html' : req;
+    const key = isApp ? './index.html' : req;
     const cached = await cache.match(key, { ignoreSearch: true });
     const update = fetch(req).then(res => {
       if (res.ok) cache.put(key, res.clone());
