@@ -288,8 +288,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     .toolbar .btn.primary .lbl { display: none; }
     .toolbar .btn.primary { width: 36px; height: 36px; padding: 0; justify-content: center; }
     .banner, .banner.hide-total { padding-bottom: 20px; }
-    .banner .kpi[data-k="totaal"] { grid-column: 1 / -1; }
-    .kpi { padding: 6px 0 0; }
+    .banner .kpi, .banner .kpi.first { padding: 6px 4px 0; text-align: center; }
+    .banner .kpi .label { justify-content: center; }
+    .banner.odd .kpi.last { grid-column: 1 / -1; }
+    .asof { text-align: center; }
     .kpi .value { font-size: 24px; }
     .kpi .delta { font-size: 13px; }
     .kpi .delta .rel { display: block; }
@@ -979,7 +981,11 @@ function applyFeatures() {
   const kpis = [...banner.querySelectorAll('.kpi')].filter(el => !el.classList.contains('feature-off') &&
     !(el.dataset.k === 'totaal' && banner.classList.contains('hide-total')));
   banner.style.setProperty('--kpis', kpis.length);
-  banner.querySelectorAll('.kpi').forEach(el => el.classList.toggle('first', el === kpis[0]));
+  banner.querySelectorAll('.kpi').forEach(el => {
+    el.classList.toggle('first', el === kpis[0]);
+    el.classList.toggle('last', el === kpis[kpis.length - 1]);
+  });
+  banner.classList.toggle('odd', kpis.length % 2 === 1);
 }
 
 function render() {
