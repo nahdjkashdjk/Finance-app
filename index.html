@@ -245,6 +245,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .list-row { display: grid; grid-template-columns: 1fr 1.3fr 32px; gap: 8px; align-items: center; }
   .list-row input { font: inherit; font-size: 16px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px; width: 100%; min-width: 0; background: #fff; color: var(--ink); }
   .list-row .euro input { padding-left: 26px; }
+  .list-row input[aria-invalid="true"] { border-color: var(--neg); background: #FFF5F4; }
   .list-row .del { width: 32px; height: 32px; border: 0; background: none; color: var(--muted); cursor: pointer; border-radius: 6px; font-size: 18px; }
   .list-row .del:hover { background: #FDECEA; color: var(--neg); }
   .link-btn { border: 0; background: none; color: var(--liquide); cursor: pointer; padding: 8px 0; font-size: 14px; font-weight: 500; }
@@ -1344,7 +1345,7 @@ function listRow(kind, a, b) {
   row.innerHTML = (kind === 'hyp'
     ? `<input type="text" inputmode="numeric" placeholder="jaar" aria-label="Jaar" value="${a ?? ''}">`
     : `<input type="date" aria-label="Datum" value="${a ?? ''}">`) +
-    `<span class="euro"><input type="text" inputmode="decimal" aria-label="Bedrag" value="${numStr(b)}"></span>` +
+    `<span class="euro"><input type="text" inputmode="decimal" aria-label="Bedrag" value="${b === null || b === undefined ? '' : Number(b).toLocaleString('nl-NL', { useGrouping: false, maximumFractionDigits: 2 })}"></span>` +
     `<button type="button" class="del" aria-label="Verwijderen">×</button>`;
   row.querySelector('.del').onclick = () => row.remove();
   return row;
@@ -1399,7 +1400,12 @@ $('settingsForm').onsubmit = e => {
   if (!S.woning.aandeel) S.woning.aandeel = 50;
   if (!S.inleg.dag) S.inleg.dag = 25;
   if (S.woning.hypotheek && !S.woning.aankoopbedrag) S.woning.aankoopbedrag = S.woning.hypotheek;
-  if (bad) { $('settingsError').textContent = 'Controleer de rood gemarkeerde velden.'; $('settingsError').hidden = false; return; }
+  if (bad) {
+    $('settingsError').textContent = 'Controleer de rood gemarkeerde velden.'; $('settingsError').hidden = false;
+    const first = $('settingsForm').querySelector('[aria-invalid="true"]');
+    if (first) { first.scrollIntoView({ block: 'center', behavior: 'smooth' }); first.focus({ preventScroll: true }); }
+    return;
+  }
   saveSettings(S);
   sdlg.close();
   if (DATA.length) setData(DATA.map(stripDerived), SOURCE, []); else render();
