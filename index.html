@@ -4,7 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Finance</title>
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#000000" id="themeColor">
+<script>
+  // thema vóór het tekenen toepassen, zodat het scherm niet even van kleur wisselt
+  (function () {
+    var t = 'dark'; try { t = localStorage.getItem('fin-theme') || 'dark'; } catch (e) {}
+    var light = t === 'light' || (t === 'system' && matchMedia('(prefers-color-scheme: light)').matches);
+    document.documentElement.dataset.theme = light ? 'light' : 'dark';
+    document.querySelector('#themeColor').content = light ? '#FFFFFF' : '#000000';
+  })();
+</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icons/favicon-64-v2.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon-v2.png">
@@ -70,6 +79,47 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     --pos-band: #3DD68C;
     --neg-band: #F2726B;
     --font: "Schibsted Grotesk", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --dots: #2E2E33;
+    --hover: rgba(255,255,255,0.035);
+    --press: rgba(255,255,255,0.05);
+    --primary-bg: #FFFFFF;
+    --primary-ink: #000000;
+    --primary-hover: #E4E4E7;
+    --bad-bg: #2A1414;
+    --warn-bg: #1F1A0E;
+    --warn-ink: #F3DDA4;
+    --err-ink: #F8B4AE;
+    --tip-bg: #26262A;
+    --tip-line: #34343A;
+    --shadow: 0 16px 40px rgba(0,0,0,0.6);
+    --backdrop: rgba(0,0,0,0.7);
+  }
+  html[data-theme="light"] {
+    color-scheme: light;
+    --bg: #FFFFFF;
+    --panel: #F3F3F5;
+    --panel-2: #E9E9EC;
+    --panel-3: #DCDCE1;
+    --line: #E1E1E6;
+    --ink: #0A0A0B;
+    --muted: #67676F;
+    --pos: #129A56;
+    --neg: #D4463C;
+    --grey: #A3A3AC;
+    --dots: #D4D4D9;
+    --hover: rgba(0,0,0,0.035);
+    --press: rgba(0,0,0,0.06);
+    --primary-bg: #0A0A0B;
+    --primary-ink: #FFFFFF;
+    --primary-hover: #2A2A2E;
+    --bad-bg: #FDECEA;
+    --warn-bg: #FFF4DD;
+    --warn-ink: #6B4A00;
+    --err-ink: #9A2A21;
+    --tip-bg: #FFFFFF;
+    --tip-line: #DCDCE1;
+    --shadow: 0 12px 32px rgba(0,0,0,0.12);
+    --backdrop: rgba(0,0,0,0.35);
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; background: var(--bg); }
@@ -107,15 +157,20 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .icon-btn:hover { background: var(--panel-3); }
   .icon-btn svg, .add-btn svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   #menuBtn svg circle { fill: currentColor; stroke: none; }
+  #yearBtn.has-year { width: auto; padding: 0 14px 0 12px; gap: 7px; display: inline-flex; align-items: center; background: var(--panel-3); }
+  #yearBtn .yr { font-weight: 600; font-size: 14.5px; }
+  .menu button[aria-checked="true"] { font-weight: 600; }
+  .menu button[aria-checked="true"]::after { content: "✓"; float: right; color: var(--pos); }
+  #yearMenu { min-width: 170px; max-height: 60vh; overflow: auto; }
   .add-btn {
     display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 18px 0 14px; border-radius: 999px; cursor: pointer;
-    border: 0; background: #FFFFFF; color: #000000; font-weight: 600;
+    border: 0; background: var(--primary-bg); color: var(--primary-ink); font-weight: 600;
   }
-  .add-btn:hover { background: #E4E4E7; }
+  .add-btn:hover { background: var(--primary-hover); }
   .menu-wrap { position: relative; }
   .menu {
     position: absolute; right: 0; top: calc(100% + 8px); z-index: 20; min-width: 210px; padding: 6px;
-    background: var(--panel-2); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow);
   }
   .menu button {
     display: block; width: 100%; text-align: left; padding: 10px 12px; border: 0; background: none; color: var(--ink);
@@ -125,6 +180,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
   /* Saldo bovenaan */
   .hero { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 16px; padding: 22px 0 18px; }
+  .hero-text { cursor: pointer; border-radius: 12px; }
   .hero-label { font-size: 17px; font-weight: 600; margin: 0; }
   .hero-value { font-size: clamp(38px, 5vw, 52px); font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; margin: 4px 0 6px; }
   .hero-delta { font-size: 15px; font-weight: 600; }
@@ -154,8 +210,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     padding: 14px 22px; border: 0; background: none; color: inherit; text-align: left; cursor: pointer; width: 100%;
     border-radius: 16px;
   }
-  @media (hover: hover) { .row:hover { background: rgba(255,255,255,0.035); } }
-  .row:active { background: rgba(255,255,255,0.05); }
+  @media (hover: hover) { .row:hover { background: var(--hover); } }
+  .row:active { background: var(--press); }
   .row .ico { width: 42px; height: 42px; border-radius: 50%; background: var(--panel-3); display: grid; place-items: center; }
   .row .ico svg { width: 20px; height: 20px; fill: none; stroke: var(--ink); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   .row .name { font-weight: 600; font-size: 15.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -206,11 +262,11 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     border: 0; background: var(--panel-2); color: var(--ink); padding: 10px 18px; border-radius: 999px; cursor: pointer; font-weight: 500;
   }
   .btn:hover { background: var(--panel-3); }
-  .btn.primary, .btn.solid { background: #FFFFFF; color: #000000; font-weight: 600; }
-  .btn.primary:hover, .btn.solid:hover { background: #E4E4E7; }
+  .btn.primary, .btn.solid { background: var(--primary-bg); color: var(--primary-ink); font-weight: 600; }
+  .btn.primary:hover, .btn.solid:hover { background: var(--primary-hover); }
   .btn.ghost { background: var(--panel-2); color: var(--ink); }
-  .notice { margin: 0 0 16px; padding: 12px 16px; border-radius: 14px; background: #1F1A0E; color: #F3DDA4; font-size: 14px; }
-  .notice.error { background: #2A1414; color: #F8B4AE; }
+  .notice { margin: 0 0 16px; padding: 12px 16px; border-radius: 14px; background: var(--warn-bg); color: var(--warn-ink); font-size: 14px; }
+  .notice.error { background: var(--bad-bg); color: var(--err-ink); }
   .drop-hint {
     position: fixed; inset: 0; background: rgba(0,0,0,0.85); color: #fff;
     display: none; align-items: center; justify-content: center; font-size: 22px; font-weight: 600; z-index: 10;
@@ -225,19 +281,23 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .lock-card { text-align: center; display: grid; justify-items: center; gap: 4px; max-width: 320px; }
   .lock-card img { border-radius: 18px; margin-bottom: 8px; }
   .lock-card h2 { margin: 0; font-size: 24px; }
-  .lock-card p { margin: 0 0 16px; color: var(--muted); }
+  .lock-card p { margin: 0 0 16px; color: #8E8E96; }
+  .lock-card h2 { color: #FFFFFF; }
   .lock-btn { background: #fff; color: #000; font-weight: 600; padding: 12px 26px; font-size: 16px; }
   .lock-btn:hover { background: #E4E4E7; }
-  .lock-error { color: var(--neg) !important; margin-top: 12px !important; font-size: 14px; }
+  .lock-error { color: #F2726B !important; margin-top: 12px !important; font-size: 14px; }
+  .choice { display: inline-flex; background: var(--panel-2); border-radius: 999px; padding: 3px; }
+  .choice button { border: 0; background: transparent; color: var(--muted); padding: 7px 16px; border-radius: 999px; cursor: pointer; font-weight: 500; }
+  .choice button[aria-checked="true"] { background: var(--panel-3); color: var(--ink); }
   .sec-status { font-size: 14px; color: var(--muted); margin: 0 0 10px !important; }
 
   /* Dialogen */
   dialog {
     width: min(460px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: auto;
     border: 1px solid var(--line); border-radius: 22px; padding: 24px; color: var(--ink); background: var(--panel);
-    box-shadow: 0 24px 70px rgba(0,0,0,0.7);
+    box-shadow: var(--shadow);
   }
-  dialog::backdrop { background: rgba(0,0,0,0.7); }
+  dialog::backdrop { background: var(--backdrop); }
   dialog h2 { margin: 0 0 16px; font-size: 20px; }
   dialog p { margin: 0 0 16px; color: var(--muted); }
   .field { display: grid; gap: 5px; margin-bottom: 12px; font-size: 14px; }
@@ -248,7 +308,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     background: var(--panel-2); color: var(--ink); width: 100%; min-width: 0;
   }
   .field input:focus, .list-row input:focus { outline: none; border-color: var(--grey); }
-  .field input[aria-invalid="true"], .list-row input[aria-invalid="true"] { border-color: var(--neg); background: #2A1414; }
+  .field input[aria-invalid="true"], .list-row input[aria-invalid="true"] { border-color: var(--neg); background: var(--bad-bg); }
   .euro { position: relative; }
   .euro::before { content: "€"; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); }
   .euro input { padding-left: 28px; }
@@ -263,7 +323,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .list-row { display: grid; grid-template-columns: 1fr 1.3fr 32px; gap: 8px; align-items: center; }
   .list-row .euro input { padding-left: 26px; }
   .list-row .del { width: 32px; height: 32px; border: 0; background: none; color: var(--muted); cursor: pointer; border-radius: 8px; font-size: 18px; }
-  .list-row .del:hover { background: #2A1414; color: var(--neg); }
+  .list-row .del:hover { background: var(--bad-bg); color: var(--neg); }
   .link-btn { border: 0; background: none; color: var(--pos); cursor: pointer; padding: 8px 0; font-size: 14px; font-weight: 500; }
   .dialog-actions.sticky { position: sticky; bottom: 0; background: var(--panel); padding: 12px 0 20px; margin-top: 4px; border-top: 1px solid var(--line); }
 
@@ -356,9 +416,30 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   </div>
 </div>
 
+<dialog id="prefs" aria-labelledby="prefsTitle">
+  <h2 id="prefsTitle">Instellingen</h2>
+  <fieldset>
+    <legend>Weergave</legend>
+    <div class="choice" role="radiogroup" aria-label="Weergave">
+      <button type="button" role="radio" data-theme-choice="light" aria-checked="false">Licht</button>
+      <button type="button" role="radio" data-theme-choice="dark" aria-checked="true">Donker</button>
+      <button type="button" role="radio" data-theme-choice="system" aria-checked="false">Apparaat</button>
+    </div>
+    <p class="sec-status" style="margin-top:10px !important">Bij Apparaat volgt de app het licht of donker thema van je telefoon of computer.</p>
+  </fieldset>
+  <fieldset>
+    <legend>Beveiliging</legend>
+    <p class="sec-status" id="lockStatus"></p>
+    <button type="button" class="btn ghost" id="lockToggle"></button>
+  </fieldset>
+  <div class="dialog-actions">
+    <button type="button" class="btn solid" data-close>Klaar</button>
+  </div>
+</dialog>
+
 <dialog id="settings" aria-labelledby="settingsTitle">
   <form id="settingsForm" novalidate>
-    <h2 id="settingsTitle">Instellingen</h2>
+    <h2 id="settingsTitle">Vaste gegevens</h2>
     <p>Deze gegevens worden alleen op dit apparaat bewaard en gaan mee in de Excel-download. Laat een onderdeel leeg als je het niet gebruikt.</p>
 
     <fieldset>
@@ -393,12 +474,6 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <button type="button" class="link-btn" id="stuAdd">+ Stand toevoegen</button>
     </fieldset>
 
-    <fieldset>
-      <legend>Beveiliging</legend>
-      <p class="sec-status" id="lockStatus"></p>
-      <button type="button" class="btn ghost" id="lockToggle"></button>
-    </fieldset>
-
     <p class="form-error" id="settingsError" hidden></p>
     <div class="dialog-actions sticky">
       <button type="button" class="btn ghost" data-close>Annuleren</button>
@@ -409,15 +484,20 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
 <div class="app">
 <header class="toolbar">
-  <label class="period">
-    <select id="yearSelect" aria-label="Periode"><option value="all">Totaal</option></select>
-  </label>
+  <select id="yearSelect" aria-label="Periode" hidden><option value="all">Alle jaren</option></select>
   <div class="mode" role="group" aria-label="Saldo bovenaan">
     <button id="modeLiquide" aria-pressed="true">Liquide</button>
-    <button id="modeNetto" aria-pressed="false">Netto</button>
+    <button id="modeNetto" aria-pressed="false">Totaal</button>
   </div>
   <div class="spacer"></div>
   <span class="status" id="status"></span>
+  <div class="menu-wrap">
+    <button class="icon-btn" id="yearBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Periode: alle jaren" title="Periode kiezen">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+      <span class="yr" id="yearLbl" hidden></span>
+    </button>
+    <div class="menu" id="yearMenu" role="menu" hidden></div>
+  </div>
   <button class="add-btn" id="entryBtn" aria-label="Maand invoeren"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="lbl">Maand invoeren</span></button>
   <button class="icon-btn" id="settingsBtn" aria-label="Instellingen" title="Instellingen">
     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
@@ -427,6 +507,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
     </button>
     <div class="menu" id="menu" role="menu" hidden>
+      <button role="menuitem" id="fixedBtn">Vaste gegevens wijzigen</button>
       <button role="menuitem" id="openBtn">Excel uploaden</button>
       <button role="menuitem" id="refreshBtn" hidden>Zelfde Excel opnieuw inlezen</button>
       <button role="menuitem" id="exportBtn" hidden>Excel downloaden</button>
@@ -436,7 +517,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 </header>
 
 <section class="hero" id="hero" hidden>
-  <div>
+  <div class="hero-text" id="heroText" role="button" tabindex="0" aria-label="Bekijk de grafiek">
     <h1 class="hero-label" id="heroLabel">Liquide vermogen</h1>
     <div class="hero-value" id="heroValue"></div>
     <div class="hero-delta" id="heroDelta"></div>
@@ -469,7 +550,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   <section id="grafieken" hidden>
   <div class="grid" id="grid">
     <section class="panel" id="pNetto">
-      <h2>Netto vermogen</h2>
+      <h2>Netto totaal vermogen</h2>
       <p class="sub">Liquide vermogen, Brand New Day en woning, min studieschuld</p>
       <div class="chart-box"><canvas id="cNetto"></canvas></div>
     </section>
@@ -514,10 +595,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     </section>
     <section class="panel" id="pMut">
       <h2 id="mutTitle">Mutatie per maand</h2>
-      <p class="sub" id="mutSub">Netto vermogen</p>
+      <p class="sub" id="mutSub">Netto totaal vermogen</p>
       <div class="chart-box"><canvas id="cMut"></canvas></div>
       <div class="seg" role="group" aria-label="Kies reeks">
-        <button data-m="totaal" aria-pressed="true">Netto</button>
+        <button data-m="totaal" aria-pressed="true">Totaal</button>
         <button data-m="liquide" aria-pressed="false">Liquide</button>
         <button data-m="spaargeld" aria-pressed="false">Spaargeld</button>
         <button data-m="beleg" aria-pressed="false">Beleggingen</button>
@@ -835,7 +916,7 @@ function sparkSVG(values, opt = {}) {
   const lastP = pts[pts.length - 1];
   return `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true">
     <defs>
-      <pattern id="${id}d" width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="0.9" fill="#2E2E33"/></pattern>
+      <pattern id="${id}d" width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="0.9" fill="${getComputedStyle(document.documentElement).getPropertyValue('--dots').trim()}"/></pattern>
       <linearGradient id="${id}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${g}" stop-opacity="0.22"/><stop offset="1" stop-color="${g}" stop-opacity="0"/></linearGradient>
     </defs>
     <rect width="${W}" height="${H}" fill="url(#${id}d)"/>
@@ -880,9 +961,14 @@ function enrich(months) {
 /* ---------- Grafieken ---------- */
 Chart.defaults.font.family = css('--font');
 Chart.defaults.font.size = 12;
-Chart.defaults.color = css('--muted');
-Chart.defaults.plugins.tooltip.backgroundColor = '#26262A';
-Chart.defaults.plugins.tooltip.borderColor = '#34343A';
+function chartDefaults() {
+  Chart.defaults.color = css('--muted');
+  Chart.defaults.plugins.tooltip.backgroundColor = css('--tip-bg');
+  Chart.defaults.plugins.tooltip.borderColor = css('--tip-line');
+  Chart.defaults.plugins.tooltip.titleColor = css('--ink');
+  Chart.defaults.plugins.tooltip.bodyColor = css('--ink');
+}
+chartDefaults();
 Chart.defaults.plugins.tooltip.borderWidth = 1;
 Chart.defaults.plugins.tooltip.padding = 10;
 Chart.defaults.plugins.tooltip.cornerRadius = 10;
@@ -1011,7 +1097,7 @@ function initCharts() {
 
 /* ---------- Weergave ---------- */
 const MUT_LABELS = {
-  totaal: 'Netto vermogen',
+  totaal: 'Netto totaal vermogen',
   studieAf: 'Aflossing studieschuld',
   woning: 'Eigen vermogen woning',
   liquide: 'Liquide vermogen',
@@ -1082,7 +1168,7 @@ function render() {
   const last = DATA[endI], base = baseI >= 0 ? DATA[baseI] : null;
   const series = k => points.map(i => DATA[i][k]);
   const heroK = heroMode === 'netto' ? 'totaal' : 'liquide';
-  $('heroLabel').textContent = heroMode === 'netto' ? 'Netto vermogen' : 'Liquide vermogen';
+  $('heroLabel').textContent = heroMode === 'netto' ? 'Netto totaal vermogen' : 'Liquide vermogen';
   $('heroValue').textContent = money(last[heroK]);
   $('heroDelta').innerHTML = rel ? deltaHTML(last[heroK] - base[heroK], base[heroK]) + ` <span class="hero-meta-inline">${rel}</span>` : '';
   $('heroMeta').textContent = asof;
@@ -1166,8 +1252,9 @@ function render() {
 function fillYears() {
   const sel = $('yearSelect'), current = sel.value;
   const years = [...new Set(DATA.map(m => m.key.slice(0, 4)))].sort().reverse();
-  sel.innerHTML = '<option value="all">Totaal</option>' + years.map(y => `<option value="${y}">${y}</option>`).join('');
+  sel.innerHTML = '<option value="all">Alle jaren</option>' + years.map(y => `<option value="${y}">${y}</option>`).join('');
   sel.value = years.includes(current) ? current : 'all';
+  syncYearUi();
 }
 
 function showMessages(notices, isError) {
@@ -1262,6 +1349,30 @@ $('modeLiquide').onclick = () => { setHeroMode('liquide'); render(); };
 $('modeNetto').onclick = () => { setHeroMode('netto'); render(); };
 try { setHeroMode(localStorage.getItem('fin-hero-mode')); } catch (e) { setHeroMode('liquide'); }
 
+/* ---------- Thema: licht, donker of volgens het apparaat ---------- */
+let themeChoice = 'dark';
+try { themeChoice = localStorage.getItem('fin-theme') || 'dark'; } catch (e) {}
+const darkMq = matchMedia('(prefers-color-scheme: light)');
+function applyTheme() {
+  const light = themeChoice === 'light' || (themeChoice === 'system' && darkMq.matches);
+  const want = light ? 'light' : 'dark';
+  $('themeColor').content = light ? '#FFFFFF' : '#000000';
+  if (document.documentElement.dataset.theme === want && charts.liquide) return;
+  document.documentElement.dataset.theme = want;
+  chartDefaults();
+  Object.keys(charts).forEach(k => { charts[k].destroy(); delete charts[k]; });   // grafieken opnieuw opbouwen in de nieuwe kleuren
+  if (DATA.length) render();
+}
+function setTheme(choice) {
+  themeChoice = choice;
+  try { localStorage.setItem('fin-theme', choice); } catch (e) {}
+  syncThemeUi(); applyTheme();
+}
+function syncThemeUi() {
+  document.querySelectorAll('[data-theme-choice]').forEach(b => b.setAttribute('aria-checked', b.dataset.themeChoice === themeChoice));
+}
+darkMq.addEventListener('change', () => { if (themeChoice === 'system') applyTheme(); });
+
 /* ---------- Tabbladen en naar een grafiek springen ---------- */
 function currentTab() { return location.hash === '#grafieken' ? 'grafieken' : 'home'; }
 function showTab(tab) {
@@ -1292,6 +1403,8 @@ function goToChart(id) {
 }
 $('rows').addEventListener('click', e => { const r = e.target.closest('.row'); if (r) goToChart(r.dataset.target); });
 $('heroSpark').onclick = () => goToChart($('heroSpark').dataset.target);
+$('heroText').onclick = () => goToChart($('heroSpark').dataset.target);
+$('heroText').onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goToChart($('heroSpark').dataset.target); } };
 $('tabHome').onclick = e => { e.preventDefault(); history.replaceState(null, '', location.pathname + location.search); showTab('home'); scrollTo({ top: 0 }); };
 document.querySelectorAll('.seg button').forEach(b => b.onclick = () => {
   mutMode = b.dataset.m;
@@ -1420,6 +1533,31 @@ $('menu').addEventListener('click', () => toggleMenu(false));
 document.addEventListener('click', e => { if (!$('menu').hidden && !e.target.closest('.menu-wrap')) toggleMenu(false); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('menu').hidden) { toggleMenu(false); $('menuBtn').focus(); } });
 
+/* ---------- Kalenderknop: periode kiezen ---------- */
+function syncYearUi() {
+  const v = $('yearSelect').value;
+  $('yearLbl').textContent = v === 'all' ? '' : v;
+  $('yearLbl').hidden = v === 'all';
+  $('yearBtn').classList.toggle('has-year', v !== 'all');
+  $('yearBtn').setAttribute('aria-label', 'Periode: ' + (v === 'all' ? 'alle jaren' : v));
+  $('yearMenu').innerHTML = [...$('yearSelect').options].map(o =>
+    `<button role="menuitemradio" aria-checked="${o.value === v}" data-year="${o.value}">${o.textContent}</button>`).join('');
+}
+function toggleYearMenu(open) {
+  $('yearMenu').hidden = !open;
+  $('yearBtn').setAttribute('aria-expanded', open);
+  if (open) { toggleMenu(false); ($('yearMenu').querySelector('[aria-checked="true"]') || $('yearMenu').firstElementChild)?.focus(); }
+}
+$('yearBtn').onclick = e => { e.stopPropagation(); syncYearUi(); toggleYearMenu($('yearMenu').hidden); };
+$('yearMenu').addEventListener('click', e => {
+  const b = e.target.closest('[data-year]'); if (!b) return;
+  $('yearSelect').value = b.dataset.year;
+  toggleYearMenu(false); syncYearUi(); render();
+});
+document.addEventListener('click', e => { if (!$('yearMenu').hidden && !e.target.closest('#yearMenu, #yearBtn')) toggleYearMenu(false); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('yearMenu').hidden) { toggleYearMenu(false); $('yearBtn').focus(); } });
+$('menuBtn').addEventListener('click', () => toggleYearMenu(false));
+
 /* ---------- Instellingen ---------- */
 const sdlg = $('settings');
 const numStr = v => (v === null || v === undefined || v === '' || v === 0) ? '' : Number(v).toLocaleString('nl-NL', { useGrouping: false, maximumFractionDigits: 2 });
@@ -1448,7 +1586,7 @@ function openSettings() {
   $('settingsError').hidden = true;
   sdlg.showModal();
 }
-$('settingsBtn').onclick = openSettings;
+$('fixedBtn').onclick = openSettings;
 $('hypAdd').onclick = () => {
   const years = [...$('hypList').querySelectorAll('.list-row input:first-child')].map(i => +i.value).filter(Boolean);
   const r = listRow('hyp', years.length ? Math.max(...years) + 1 : '', null); $('hypList').append(r); r.querySelector('input').focus();
@@ -1570,8 +1708,9 @@ $('lockToggle').onclick = async () => {
   }
   updateLockUi();
 };
-const _openSettings = openSettings;
-$('settingsBtn').onclick = () => { _openSettings(); updateLockUi(); };
+$('settingsBtn').onclick = () => { syncThemeUi(); updateLockUi(); $('prefs').showModal(); };
+$('prefs').querySelectorAll('[data-close]').forEach(b => b.onclick = () => $('prefs').close());
+$('prefs').querySelectorAll('[data-theme-choice]').forEach(b => b.onclick = () => setTheme(b.dataset.themeChoice));
 
 /* ---------- Installeerbare app ---------- */
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
