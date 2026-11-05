@@ -1366,9 +1366,10 @@ const darkMq = matchMedia('(prefers-color-scheme: light)');
 function applyTheme() {
   const light = themeChoice === 'light' || (themeChoice === 'system' && darkMq.matches);
   const want = light ? 'light' : 'dark';
-  syncSystemBars();
-  if (document.documentElement.dataset.theme === want && charts.liquide) return;
-  document.documentElement.dataset.theme = want;
+  const changed = document.documentElement.dataset.theme !== want;
+  document.documentElement.dataset.theme = want;   // eerst het thema zetten …
+  syncSystemBars();                                  // … en pas daarna de kleur van de systeembalk doorgeven
+  if (!changed && charts.liquide) return;
   chartDefaults();
   Object.keys(charts).forEach(k => { charts[k].destroy(); delete charts[k]; });   // grafieken opnieuw opbouwen in de nieuwe kleuren
   if (DATA.length) render();
