@@ -177,6 +177,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .panel .sub { font-size: 13px; color: var(--muted); margin: 0 0 14px; }
   .chart-box { position: relative; height: 240px; }
   .panel.flash { animation: flash 1.8s ease-out; }
+  @media (min-width: 641px) { .panel.flash { animation-duration: 3s; } }
   @keyframes flash {
     0%, 30%, 60% { box-shadow: 0 0 0 2px var(--pos), 0 0 28px rgba(61,214,140,0.35); }
     15%, 45% { box-shadow: 0 0 0 2px rgba(61,214,140,0.15), 0 0 0 rgba(61,214,140,0); }
@@ -844,7 +845,7 @@ function sparkSVG(values, opt = {}) {
   </svg>`;
 }
 const ICONS = {
-  wallet: '<svg viewBox="0 0 24 24"><path d="M19 7V5.5A1.5 1.5 0 0 0 17.5 4h-12A1.5 1.5 0 0 0 4 5.5v13A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V9a2 2 0 0 0-2-2H5"/><circle cx="16" cy="13.5" r="1.2"/></svg>',
+  drop: '<svg viewBox="0 0 24 24"><path d="M12 3.2c-.3.4-6.5 7.4-6.5 11.6a6.5 6.5 0 0 0 13 0C18.5 10.6 12.3 3.6 12 3.2z"/><path d="M9.2 15.2a3 3 0 0 0 2.6 2.6"/></svg>',
   coins: '<svg viewBox="0 0 24 24"><ellipse cx="10" cy="6.5" rx="6" ry="2.5"/><path d="M4 6.5v4c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5v-4"/><path d="M8 15.3c.6.1 1.3.2 2 .2 3.3 0 6-1.1 6-2.5"/><path d="M14 13.8c.9-.2 1.6-.2 2-.2 3.3 0 6 1.1 6 2.5v2.4c0 1.4-2.7 2.5-6 2.5s-6-1.1-6-2.5"/></svg>',
   trend: '<svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>',
   umbrella: '<svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 18 0z"/><path d="M12 12v6.5a2 2 0 0 1-4 0"/><path d="M12 3v0"/></svg>',
@@ -853,7 +854,7 @@ const ICONS = {
 };
 const FEATURE_ON = { woning: () => hasWoning(), studie: () => hasStudie() };
 const ROWS = [
-  { k: 'liquide',   target: 'pLiquide', name: 'Liquide vermogen', desc: 'Sparen en beleggen', icon: ICONS.wallet },
+  { k: 'liquide',   target: 'pLiquide', name: 'Liquide vermogen', desc: 'Sparen en beleggen', icon: ICONS.drop },
   { k: 'spaargeld', target: 'pSpaar',   name: 'Spaargeld',        desc: 'Betalen en sparen', icon: ICONS.coins },
   { k: 'beleg',     target: 'pBeleg',   name: 'Beleggingen',      desc: 'Beleggingsrekening', icon: ICONS.trend },
   { k: 'bnd',       target: 'pBnd',     name: 'Brand New Day',    desc: 'Pensioen', icon: ICONS.umbrella },
@@ -1279,8 +1280,14 @@ function goToChart(id) {
   requestAnimationFrame(() => requestAnimationFrame(() => {
     const el = $(id); if (!el) return;
     el.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
-    el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
-    setTimeout(() => el.classList.remove('flash'), 2000);
+    const wide = matchMedia('(min-width: 641px)').matches;
+    const flash = () => { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), wide ? 3200 : 2000); };
+    if (!wide) return flash();
+    // op de laptop pas oplichten als de grafiek in beeld staat
+    let done = false;
+    const go = () => { if (!done) { done = true; removeEventListener('scrollend', go); flash(); } };
+    addEventListener('scrollend', go, { once: true });
+    setTimeout(go, 600);
   }));
 }
 $('rows').addEventListener('click', e => { const r = e.target.closest('.row'); if (r) goToChart(r.dataset.target); });
